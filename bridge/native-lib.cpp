@@ -5,6 +5,7 @@
 #include "CryptoEngine.h"
 #include "DatabaseManager.h"
 #include "DataParser.h" 
+#include "LedgerVerifier.h" // <--- NUEVO HEADER
 
 DatabaseManager* dbManager = nullptr;
 

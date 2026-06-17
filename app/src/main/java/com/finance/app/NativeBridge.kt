@@ -1,17 +1,20 @@
 package com.finance.app
 
-/**
- * Aduana de comunicación segura entre la JVM/ART de Android y el Core en C++.
- */
 object NativeBridge {
 
     init {
-        // Carga la librería compartida compilada por CMake
         System.loadLibrary("financer_asist")
     }
 
-    /**
-     * Devuelve la versión de compilación del motor nativo.
-     */
     external fun getVersion(): String
+    external fun hashData(data: String): String
+    external fun initDatabase(dbPath: String): Boolean
+    external fun saveTransaction(date: String, amount: Double, category: String, description: String, prevHash: String): Boolean
+    external fun parseAndLoadCSV(csvContent: String, lastKnownHash: String): Int
+
+    /**
+     * Ejecuta una verificación criptográfica secuencial sobre todo el Ledger.
+     * Retorna un string con formato "STATUS|BLOCKS|DETAIL"
+     */
+    external fun verifyLedger(): String
 }
