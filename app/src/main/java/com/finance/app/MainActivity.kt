@@ -18,7 +18,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Inicialización automática de la DB en el directorio seguro del Sandbox
         val dbPath = "${filesDir.absolutePath}/ledger.db"
         val dbInitialized = NativeBridge.initDatabase(dbPath)
         Log.i("FinancerApp", "Ledger nativo inicializado en $dbPath: $dbInitialized")
@@ -41,7 +40,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -54,7 +53,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
+                            Column(modifier = Modifier.padding(12.dp)) {
                                 Text(text = "Último bloque encadenado (Prev Hash):", style = MaterialTheme.typography.labelMedium)
                                 Text(text = lastHash, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                             }
@@ -86,8 +85,6 @@ class MainActivity : ComponentActivity() {
                                 val amount = amountInput.toDoubleOrNull()
                                 if (amount != null) {
                                     val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-                                    
-                                    // Inserción directa en el Core C++ vía JNI con Hash Chaining
                                     val success = NativeBridge.saveTransaction(
                                         date = currentDate,
                                         amount = amount,
@@ -97,22 +94,46 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     if (success) {
-                                        // Generamos de forma idéntica el payload local para actualizar el estado del prevHash simulado
                                         val payload = currentDate + amount.toString() + categoryInput + descriptionInput
                                         lastHash = NativeBridge.hashData(payload)
-                                        statusMessage = "Transacción firmada e indexada con éxito."
+                                        statusMessage = "Transacción firmada con éxito."
                                         amountInput = ""
                                         descriptionInput = ""
                                     } else {
-                                        statusMessage = "Error crítico al escribir en el Ledger Nativo."
+                                        statusMessage = "Error crítico en el Ledger Nativo."
                                     }
                                 } else {
-                                    statusMessage = "Por favor, introduce un monto válido."
+                                    statusMessage = "Introduce un monto válido."
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Indexar Evidencia Financiera")
+                            Text("Indexar Evidencia Individual")
+                        }
+
+                        // --- NUEVA SECCIÓN: INGESTA POR LOTES (OFFLINE CSV PARSER) ---
+                        ElevatedButton(
+                            onClick = {
+                                // Datos mockeados simulando la extracción de un archivo local
+                                val mockCsvDump = """
+                                    2026-06-15 10:00:00,45.50,Alimentacion,Supermercado Central
+                                    2026-06-16 14:20:00,120.00,Servicios,Suscripcion Servidor Cloud
+                                    2026-06-17 09:15:00,15.00,Transporte,Carga Tarjeta Metro
+                                """.trimIndent()
+
+                                val recordsImported = NativeBridge.parseAndLoadCSV(mockCsvDump, lastHash)
+                                if (recordsImported > 0) {
+                                    statusMessage = "Procesados e indexados $recordsImported registros CSV."
+                                    // Forzamos un hash dummy o una consulta de actualización posterior para refrescar la UI
+                                    lastHash = NativeBridge.hashData("RELOAD_CHAIN_STATE")
+                                } else {
+                                    statusMessage = "El Parser no encontró registros válidos."
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.elevatedButtonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                        ) {
+                            Text("Simular Importación de Archivo (CSV)")
                         }
 
                         Text(
