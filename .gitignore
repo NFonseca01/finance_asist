@@ -1,0 +1,23 @@
+# Gradle y builds de Android
+.gradle/
+build/
+app/build/
+
+# Configuración local de Android Studio / IntelliJ
+.idea/
+*.iml
+local.properties
+.DS_Store
+
+# Archivos de caché de compilación de C++ (CMake)
+.cxx/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# Binarios y librerías generadas (Solo guardamos el código fuente)
+*.so
+*.out
+*.app
