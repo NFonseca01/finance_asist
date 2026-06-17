@@ -14,13 +14,15 @@ include_directories(
 )
 
 # Compilación conjunta del motor nativo
+# Compilación conjunta del motor nativo
 add_library(
     financer_asist
     SHARED
     core/FinanceCore.cpp
-    crypto/CryptoEngine.cpp    # <--- Verificado
-    db/DatabaseManager.cpp     # <--- VERIFICADO
-    parser/DataParser.cpp      # <--- NUEVO MOTOR DE PROCESAMIENTO
+    crypto/CryptoEngine.cpp
+    db/DatabaseManager.cpp
+    parser/DataParser.cpp
+    verifier/LedgerVerifier.cpp   # <--- NUEVO MOTOR DE AUDITORÍA FORENSE
     bridge/native-lib.cpp
 )
 
